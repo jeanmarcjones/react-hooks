@@ -2,13 +2,28 @@
 // http://localhost:3000/isolated/exercise/02.js
 
 import * as React from 'react'
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
-const useLocalStorageState = (key, initialValue = '') => {
-  const [value, setValue] = React.useState(() => window.localStorage.getItem(key) ?? initialValue)
+const useLocalStorageState = (key, initialValue = '', {
+  serialize = JSON.stringify,
+  deserialize = JSON.parse
+} = {}) => {
+  const [value, setValue] = React.useState(() => {
+    const valueInLocalStorage = window.localStorage.getItem(key);
+    if (valueInLocalStorage) {
+      return deserialize(valueInLocalStorage)
+    }
+    return typeof initialValue === 'function' ? initialValue() : initialValue;
+  })
+
+  const prevKey = useRef(key);
 
   useEffect(() => {
-    window.localStorage.setItem(key, value)
+    if (prevKey.current !== key) {
+      window.localStorage.removeItem(prevKey.current)
+    }
+    prevKey.current = key
+    window.localStorage.setItem(key, serialize(value))
   }, [key, value])
 
   return [value, setValue]
