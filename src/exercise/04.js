@@ -2,7 +2,7 @@
 // http://localhost:3000/isolated/exercise/04.js
 
 import * as React from 'react'
-import { useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 const initialSquares = Array(9).fill(null)
 
@@ -21,7 +21,6 @@ const reducer = (state , action) => {
     case SELECT_SQUARE: {
       const newSquares = [...state.squares]
       newSquares[action.payload] = state.nextValue
-
       return {
         ...init(newSquares),
         squares: newSquares
@@ -35,7 +34,15 @@ const reducer = (state , action) => {
 }
 
 function Board() {
-  const [{squares, winner, status}, dispatch] = useReducer(reducer, initialSquares, init)
+  const [{squares, winner, status}, dispatch] = useReducer(
+    reducer,
+    JSON.parse(window.localStorage.getItem('squares')) || initialSquares,
+    init
+  )
+
+  useEffect(() => {
+    window.localStorage.setItem('squares', JSON.stringify(squares))
+  }, [squares])
 
   function selectSquare(square) {
     if (winner || squares[square]) return;
