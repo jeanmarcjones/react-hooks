@@ -5,7 +5,6 @@ import * as React from 'react'
 import { useLocalStorageState } from '../utils';
 
 const initialSquares = Array(9).fill(null)
-const initialHistory = [{ step: 0, squares: initialSquares }]
 
 function Board({ squares, onClick }) {
   function renderSquare(i) {
@@ -39,31 +38,41 @@ function Board({ squares, onClick }) {
 }
 
 function Game() {
-  const [currentSquares, setSquares] = useLocalStorageState('tic-tac-toe:step', initialSquares)
-  const [history, setHistory] = useLocalStorageState('tic-tac-toe:history', initialHistory)
+  const [currentStep, setCurrentStep] = useLocalStorageState('tic-tac-toe:step', 0,)
+  const [history, setHistory] = useLocalStorageState('tic-tac-toe:history', [initialSquares])
 
-  const nextValue = calculateNextValue(currentSquares)
-  const winner =  calculateWinner(currentSquares)
-  const status =  calculateStatus(winner, currentSquares, nextValue)
+  const currentSquares = history[currentStep]
+  const nextValue = calculateNextValue(history[currentStep])
+  const winner =  calculateWinner(history[currentStep])
+  const status =  calculateStatus(winner, history[currentStep], nextValue)
 
   function selectSquare(square) {
     if (winner || currentSquares[square]) return;
 
+    const newHistory = history.slice(0, currentStep + 1)
     const newSquares = [...currentSquares]
     newSquares[square] = nextValue
 
-    setSquares(newSquares)
-    setHistory([...history, { step: history.length, squares: newSquares }])
+    setCurrentStep(newHistory.length)
+    setHistory([...newHistory, newSquares])
   }
 
   function restart() {
-    setSquares(initialSquares)
-    setHistory(initialHistory)
+    setCurrentStep(0)
+    setHistory([initialSquares])
   }
 
-  function selectHistory (squares) {
-    setSquares(squares)
-  }
+  const moves = history.map((move, step) => {
+    const isCurrentMove = currentStep === step
+    return (
+      <li key={`move-${step}`}>
+        <button onClick={() => setCurrentStep(step)} disabled={isCurrentMove}>
+          {step === 0 ? 'Go to game start' : `Go to move #${step}`}
+          {isCurrentMove ? ' (current)' : null}
+        </button>
+      </li>
+    );
+  })
 
   return (
     <div className="game">
@@ -75,17 +84,7 @@ function Game() {
       </div>
       <div className="game-info">
         <div>{status}</div>
-        <ol>{history.map((move) => {
-          const isCurrentMove = currentSquares.filter((square) => Boolean(square)).length === move.step
-          return (
-            <li key={`move-${move.step}`}>
-              <button onClick={() => selectHistory(move.squares)} disabled={isCurrentMove}>
-                {move.step === 0 ? 'Go to game start' : `Go to move #${move.step}`}
-                {isCurrentMove && ' (current)'}
-              </button>
-            </li>
-          );
-        })}</ol>
+        <ol>{moves}</ol>
       </div>
     </div>
   )
