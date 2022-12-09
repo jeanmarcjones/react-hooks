@@ -2,56 +2,28 @@
 // http://localhost:3000/isolated/exercise/04.js
 
 import * as React from 'react'
-import { useEffect, useReducer, useState } from 'react';
+import { useLocalStorageState } from '../utils';
 
 const initialSquares = Array(9).fill(null)
 
-const init = (squares) => {
+function Board() {
+  const [squares, setSquares] = useLocalStorageState('squares', initialSquares)
+
   const nextValue = calculateNextValue(squares)
   const winner =  calculateWinner(squares)
   const status =  calculateStatus(winner, squares, nextValue)
-  return { squares, nextValue, winner, status }
-}
-
-const SELECT_SQUARE = 'SELECT_SQUARE'
-const RESET = 'RESET'
-
-const reducer = (state , action) => {
-  switch (action.type) {
-    case SELECT_SQUARE: {
-      const newSquares = [...state.squares]
-      newSquares[action.payload] = state.nextValue
-      return {
-        ...init(newSquares),
-        squares: newSquares
-      }
-    }
-    case RESET:
-      return init(initialSquares)
-    default:
-      return state
-  }
-}
-
-function Board() {
-  const [{squares, winner, status}, dispatch] = useReducer(
-    reducer,
-    JSON.parse(window.localStorage.getItem('squares')) || initialSquares,
-    init
-  )
-
-  useEffect(() => {
-    window.localStorage.setItem('squares', JSON.stringify(squares))
-  }, [squares])
 
   function selectSquare(square) {
     if (winner || squares[square]) return;
 
-    dispatch({ type: SELECT_SQUARE, payload: square })
+    const newSquares = [...squares]
+    newSquares[square] = nextValue
+
+    setSquares(newSquares)
   }
 
   function restart() {
-    dispatch({ type: RESET })
+    setSquares(initialSquares)
   }
 
   function renderSquare(i) {
