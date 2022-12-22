@@ -16,7 +16,11 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 }
 
 function PokemonInfo({pokemonName}) {
-  const [state, setState] = useState({ status: 'idle', pokemon: null, error: null })
+  const [state, setState] = useState({
+    status: pokemonName ? 'pending' : 'idle',
+    pokemon: null,
+    error: null
+  })
   const { status, pokemon, error } = state;
 
   useEffect(() => {
@@ -64,7 +68,7 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+        <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset} resetKeys={[pokemonName]}>
           <PokemonInfo pokemonName={pokemonName} />
         </ErrorBoundary>
       </div>
