@@ -4,26 +4,7 @@
 import * as React from 'react'
 import { PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView } from '../pokemon'
 import { useEffect, useState } from 'react';
-
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { error: null }
-  }
-
-  static getDerivedStateFromError(error) {
-    return { error }
-  }
-
-  render() {
-    const { error } = this.state
-    const { children, FallbackComponent } = this.props
-
-    if (error) return <FallbackComponent error={error} />
-
-    return children
-  }
-}
+import {ErrorBoundary} from 'react-error-boundary'
 
 function ErrorFallback({ error }) {
   return (
