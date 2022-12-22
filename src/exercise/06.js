@@ -6,20 +6,17 @@ import { PokemonForm, fetchPokemon, PokemonInfoFallback, PokemonDataView } from 
 import { useEffect, useState } from 'react';
 
 function PokemonInfo({pokemonName}) {
-  const [pokemon, setPokemon] = useState(null)
-  const [error, setError] = useState(null)
-  const [status, setStatus] = useState('idle')
+  const [state, setState] = useState({ status: 'idle', pokemon: null, error: null })
+  const { status, pokemon, error } = state;
 
   useEffect(() => {
     const makePokemonApiCall = async (name) => {
       try {
-        setStatus('pending')
+        setState({ status: 'pending' })
         const pokemonData = await fetchPokemon(name)
-        setPokemon(pokemonData)
-        setStatus('resolved')
+        setState({ status: 'resolved', pokemon: pokemonData })
       } catch (e) {
-        setError(e)
-        setStatus('rejected')
+        setState({ status: 'rejected', error: e })
       }
     }
 
